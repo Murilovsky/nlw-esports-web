@@ -1,8 +1,23 @@
 import './styles/main.css'
-import logo from './assets/logo_nlw.svg'
+import logo from '/logo_nlw.svg'
 import GameItem from './components/GameItem'
-import { MagnifyingGlassPlus } from 'phosphor-react'
+import { useEffect, useState } from 'react'
+import Game from './interfaces/IGame'
+import CreateAdd from './components/CreateAdd'
+import * as Dialog from '@radix-ui/react-dialog'
+import DialogInput from './components/form/Inputs'
+import { GameController } from 'phosphor-react'
 function App() {
+
+	const [games, setGames] = useState<Array<Game>>([])
+
+	useEffect(() => {
+		fetch('http://localhost:3000/games')
+			.then(res => res.json())
+			.then(data => setGames(data))
+
+	}, [setGames])
+
 
 	return (
 		<div className="max-w-[1344px] mx-auto flex items-center flex-col m-20">
@@ -12,29 +27,76 @@ function App() {
 			</h1>
 
 			<div className='grid grid-cols-6 gap-6'>
-
-				<GameItem name='League of Legends' image='/jogos/jogo1.png' anounces={4} />
-				<GameItem name='Dota 2' image='/jogos/jogo2.png' anounces={2} />
-				<GameItem name='Counter Strike' image='/jogos/jogo3.png' anounces={3} />
-				<GameItem name='Apex Legends' image='/jogos/jogo4.png' anounces={1} />
-				<GameItem name='League of Legends' image='/jogos/jogo5.png' anounces={7} />
-				<GameItem name='World of Warcraft' image='/jogos/jogo6.png' anounces={8} />
+				{games.map(game => <GameItem key={game.id} name={game.title} image={game.bannerUrl} anounces={game._count.ads} />)}
 
 			</div>
+			<Dialog.Root>
+				<CreateAdd />
+				<Dialog.Portal>
+					<Dialog.Overlay className='bg-black/60 inset-0 fixed'>
+						<Dialog.Content className='fixed bg-[#2A2634] py-8 px-10 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg w-[580px] shadow-lg  shadow-black/60'>
+							<Dialog.Title className='text-3xl font-black'>Publique um Anúncio</Dialog.Title>
+							<form className='mt-8 flex flex-col gap-4' action="">
+								<div className='flex flex-col gap-2'>
+									<label htmlFor="game" className='font-semibold'>Qual o game?</label>
+									<DialogInput id='game' placeholder='Selecione o que quer jogar' />
+								</div>
 
-			<div className='mt-8 pt-1 bg-nlwgradient self-stretch rounded-lg overflow-hidden'>
+								<div className='flex flex-col gap-2'>
+									<label htmlFor="name" className='font-semibold'>Seu Nickname(Apelido)</label>
+									<DialogInput id='name' type="text" placeholder='Como te chamam dentro do jogo?' />
+								</div>
+								<div className='grid grid-cols-2 gap-6'>
 
-				<div className='bg-[#2A2634] py-8 px-6 text-white rounded-lg flex justify-between'>
-					<div>
-						<h3 className='text-2xl font-black'>Não encontrou seu duo?</h3>
-						<p className='text-zinc'>Publique um anúncio para encontrar novos players!</p>
+									<div>
+										<label htmlFor="timePlaying">Joga a quantos anos?</label>
+										<DialogInput id='timePlaying' type="number" placeholder='Não tem problema ser novato' />
+									</div>
 
-					</div>
-					<button className='py-3 px-4 rounded-lg bg-purple-500 hover:bg-purple-400 font-bold flex items-center'>
-						<MagnifyingGlassPlus size={24}/>
-						Publicar Anúncio</button>
-				</div>
-			</div>
+									<div>
+										<label htmlFor="disc">Qual o seu discord?</label>
+										<DialogInput id='disc' type="text" placeholder='Usuario#1234' />
+									</div>
+
+								</div>
+								<div className='flex gap-6'>
+									<div className='flex flex-col gap-2'>
+										<label htmlFor="days">Dias da Semana</label>
+										<div className='grid grid-cols-4 gap-2'>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Domingo'>D</button>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Segunda'>S</button>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Terça'>T</button>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Quarta'>Q</button>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Quinta'>Q</button>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Sexta'>S</button>
+											<button className='w-8 h-8 rounded-md bg-zinc-900' title='Sábado'>S</button>
+
+										</div>
+									</div>
+									<div className='flex flex-col gap-2 flex-1'>
+										<label htmlFor="hourIn">Qual hora do dia?</label>
+										<div className='grid grid-cols-2 gap-2'>
+											<DialogInput id='hourIn' type="time" placeholder='19:00' />
+											<DialogInput id='hourOut' type="time" placeholder='23:45' />
+										</div>
+									</div>
+								</div>
+								<div>
+									<DialogInput className='mt-2' type="checkbox" />
+									Costumo entrar no chat de voz
+								</div>
+								<footer className='flex justify-end mt-4 gap-4'>
+									<Dialog.Close className='font-semibold rounded-md bg-zinc-500 px-5 h-12 hover:bg-zinc-600 '>Cancelar</Dialog.Close>
+									<button type='submit' className='flex flex-row gap-2 rounded-md bg-violet-500 px-5 h-12 items-center hover:bg-violet-600'>
+										<GameController size={24} />
+										Encontrar duo</button>
+								</footer>
+							</form>
+
+						</Dialog.Content>
+					</Dialog.Overlay>
+				</Dialog.Portal>
+			</Dialog.Root>
 		</div>
 	)
 }
